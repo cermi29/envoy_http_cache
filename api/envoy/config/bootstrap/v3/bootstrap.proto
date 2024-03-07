@@ -65,6 +65,9 @@ message Bootstrap {
     // These static secrets can be used by :ref:`SdsSecretConfig
     // <envoy_v3_api_msg_extensions.transport_sockets.tls.v3.SdsSecretConfig>`
     repeated envoy.extensions.transport_sockets.tls.v3.Secret secrets = 3;
+    
+    // Size for http cache defaults to 1000003 if not set
+    uint32 http_cache_size = 4;
   }
 
   // [#next-free-field: 7]

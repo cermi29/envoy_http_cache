@@ -8,6 +8,7 @@
 #include <string>
 
 #include "envoy/common/random_generator.h"
+#include "envoy/event/deferred_deletable.h"
 #include "envoy/extensions/filters/http/router/v3/router.pb.h"
 #include "envoy/http/codec.h"
 #include "envoy/http/codes.h"
@@ -569,6 +570,7 @@ private:
   // Tracks which upstream request "wins" and will have the corresponding
   // response forwarded downstream
   UpstreamRequest* final_upstream_request_ = nullptr;
+  Event::DeferredDeletablePtr cache_entry_;
   Http::RequestHeaderMap* downstream_headers_{};
   Http::RequestTrailerMap* downstream_trailers_{};
   MonotonicTime downstream_request_complete_time_;

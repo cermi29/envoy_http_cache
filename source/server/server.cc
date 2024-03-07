@@ -43,6 +43,7 @@
 #include "source/common/network/socket_interface_impl.h"
 #include "source/common/protobuf/utility.h"
 #include "source/common/router/rds_impl.h"
+#include "source/common/router/router_http_cache.h"
 #include "source/common/runtime/runtime_impl.h"
 #include "source/common/runtime/runtime_keys.h"
 #include "source/common/signal/fatal_error_handler.h"
@@ -785,6 +786,9 @@ void InstanceBase::initializeOrThrow(Network::Address::InstanceConstSharedPtr lo
   // started and before our own run() loop runs.
   main_thread_guard_dog_ = maybeCreateGuardDog("main_thread");
   worker_guard_dog_ = maybeCreateGuardDog("workers");
+
+  Http::Cache::Cache::get().init(bootstrap_.static_resources().http_cache_size());
+
 }
 
 void InstanceBase::onClusterManagerPrimaryInitializationComplete() {

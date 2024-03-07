@@ -38,6 +38,7 @@
 #include "source/common/router/config_impl.h"
 #include "source/common/router/debug_config.h"
 #include "source/common/router/retry_state_impl.h"
+#include "source/common/router/router_http_cache.h"
 #include "source/common/runtime/runtime_features.h"
 #include "source/common/stream_info/uint32_accessor_impl.h"
 #include "source/common/tracing/http_tracer_impl.h"
@@ -503,6 +504,15 @@ Http::FilterHeadersStatus Filter::decodeHeaders(Http::RequestHeaderMap& headers,
     return Http::FilterHeadersStatus::StopIteration;
   }
   cluster_ = cluster->info();
+
+  // this could probably be a bit deeper into the function
+  if (headers.getMethodValue() == Http::Headers::get().MethodValues.Get ||
+      headers.getMethodValue() == Http::Headers::get().MethodValues.Head) {
+    auto& http_cache = Envoy::Http::Cache::Cache::get();
+    if (http_cache.search(headers, callbacks_, cache_entry_, cluster->httpAsyncClient())) {
+      return Http::FilterHeadersStatus::StopIteration;
+    }
+  }
 
   // Set up stat prefixes, etc.
   request_vcluster_ = route_entry_->virtualCluster(headers);
@@ -1065,6 +1075,9 @@ void Filter::onRequestComplete() {
 }
 
 void Filter::onDestroy() {
+  if (cache_entry_) {
+    callbacks_->dispatcher().deferredDelete(std::move(cache_entry_));
+  }
   // Reset any in-flight upstream requests.
   resetAll();
 

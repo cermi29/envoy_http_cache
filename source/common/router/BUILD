@@ -275,10 +275,12 @@ envoy_cc_library(
     name = "router_lib",
     srcs = [
         "router.cc",
+        "router_http_cache.cc",
         "upstream_request.cc",
     ],
     hdrs = [
         "router.h",
+        "router_http_cache.h",
         "upstream_request.h",
     ],
     deps = [
